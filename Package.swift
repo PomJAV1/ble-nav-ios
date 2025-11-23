@@ -1,3 +1,4 @@
+// swift-tools-version: 6.2
 # Build iOS App với GitHub Actions - Hoàn toàn MIỄN PHÍ
 
 ## Tổng quan
@@ -47,3 +48,4 @@ let package = Package(
         )
     ]
 )
+
