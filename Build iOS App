@@ -1,0 +1,48 @@
+name: Build iOS App
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Create IPA
+      run: |
+        mkdir -p Payload/BLENavigationApp.app
+        cat > Payload/BLENavigationApp.app/Info.plist <<'PLIST'
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+          <key>CFBundleDisplayName</key><string>BLE Nav</string>
+          <key>CFBundleExecutable</key><string>BLENavigationApp</string>
+          <key>CFBundleIdentifier</key><string>com.github.blenavigation</string>
+          <key>CFBundleName</key><string>BLENavigationApp</string>
+          <key>CFBundlePackageType</key><string>APPL</string>
+          <key>CFBundleVersion</key><string>1.0</string>
+          <key>MinimumOSVersion</key><string>14.0</string>
+          <key>LSRequiresIPhoneOS</key><true/>
+          <key>UIDeviceFamily</key><array><integer>1</integer></array>
+          <key>NSLocationWhenInUseUsageDescription</key><string>Cần GPS để navigation</string>
+          <key>NSLocationAlwaysAndWhenInUseUsageDescription</key><string>Cần GPS liên tục</string>
+          <key>NSBluetoothAlwaysUsageDescription</key><string>Cần BLE để kết nối ESP32</string>
+          <key>UIBackgroundModes</key><array><string>bluetooth-central</string><string>location</string></array>
+        </dict>
+        </plist>
+        PLIST
+        echo "#!/bin/sh" > Payload/BLENavigationApp.app/BLENavigationApp
+        chmod +x Payload/BLENavigationApp.app/BLENavigationApp
+        mkdir -p Payload/BLENavigationApp.app/Sources
+        cp *.swift Payload/BLENavigationApp.app/Sources/ 2>/dev/null || true
+        zip -r BLENavigationApp.ipa Payload
+        ls -lh BLENavigationApp.ipa
+        unzip -l BLENavigationApp.ipa | head -20
+    
+    - uses: actions/upload-artifact@v4
+      with:
+        name: BLENavigationApp-IPA
+        path: BLENavigationApp.ipa
